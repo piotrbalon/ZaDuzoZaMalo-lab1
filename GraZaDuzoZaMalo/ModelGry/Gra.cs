@@ -1,15 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace ModelGry
 {
-    public class Gra
+    public partial class Gra
     {
-        // inner types
-        public enum Odpowiedz { ZaMalo = -1, Trafiono = 0, ZaDuzo = 1 }
-        public enum State { Trwa, Poddana, Odgadnieta }
+        // subtypes
+        public enum Odp { ZaMalo = -1, Trafiono = 0, ZaDuzo = 1 }
+        public enum StanGry { Trwa, Poddana, Odgadnieta }
 
-        //fields
-        public State StanGry { get; private set; }
+
+        // fields
         public readonly int ZakresOd;
         public readonly int ZakresDo;
         private readonly int wylosowana;
@@ -17,52 +18,63 @@ namespace ModelGry
         {
             get
             {
-                if (StanGry != State.Trwa)
+                if (Stan != StanGry.Trwa)
                     return wylosowana;
                 else
                     return null;
             }
-            //set { }
         }
+
+        public StanGry Stan { get; private set; }
+
+        public int LicznikRuchow { get; private set; }  = 0;
 
         // historia gry: ToDo
-        public int LicznikRuchow { get; private set; } = 0;
 
-        public Gra(int a, int b)
+
+        //constructors
+        public Gra(int min = 1, int max = 100)
         {
-            ZakresOd = Math.Min(a,b);
-            ZakresDo = Math.Max(a,b);
+            ZakresOd = min;
+            ZakresDo = max;
+
             wylosowana = Losuj(ZakresOd, ZakresDo);
             //LicznikRuchow = 0;
-            StanGry = State.Trwa;
+            Stan = StanGry.Trwa;
+            historia = new List<Ruch>();
         }
 
-        public Odpowiedz Ocena( int propozycja )
+        // methods
+        public Odp Ocena(int liczba)
         {
             LicznikRuchow++;
-            if (propozycja < wylosowana)
-                return Odpowiedz.ZaMalo;
-            else if (propozycja > wylosowana)
-                return Odpowiedz.ZaDuzo;
-            else
-            {
-                StanGry = State.Odgadnieta;
-                return Odpowiedz.Trafiono;
-            }
+            Odp odp;
+            if (liczba < wylosowana)
+                odp = Odp.ZaMalo;
+            else if (liczba > wylosowana)
+                odp = Odp.ZaDuzo;
+
+            // trafiono
+            Stan = StanGry.Odgadnieta;
+            odp = Odp.Trafiono;
+            historia.Add(new Ruch(liczba, odp));
+
+            return odp;
         }
 
         public void Poddaj()
         {
-            StanGry = State.Poddana;
+            Stan = StanGry.Poddana;
         }
 
+        // auxiliary methods
         public static int Losuj(int min = 1, int max = 100)
         {
             if (min > max)
-            { //swap
-                int temp = min;
-                min = max;
-                max = temp;
+            {
+                int temp = max;
+                max = min;
+                min = temp;
             }
             Random generator = new Random();
             return generator.Next(min, max + 1);

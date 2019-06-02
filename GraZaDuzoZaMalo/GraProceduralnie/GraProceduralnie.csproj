@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{25145668-33E2-4A86-A1D4-480068BFB921}</ProjectGuid>
+    <ProjectGuid>{9F560DC3-EE1A-4484-9A9F-D4B592993300}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>GraProceduralnie</RootNamespace>
     <AssemblyName>GraProceduralnie</AssemblyName>
