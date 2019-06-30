@@ -6,59 +6,61 @@ using System.Threading.Tasks;
 
 namespace GraMonolitycznie
 {
-    class ExitAppException : Exception { }
-
     class Program
     {
         /// <summary>
-        /// Losuje liczbę zpodanego zakresu włącznie.
+        /// Generuje liczbę pseudolosową z podanego zakresu włącznie z krańcami.
         /// </summary>
-        /// <remarks>Nie zwraca wyjątku.</remarks>
         /// <param name="min">dowolna liczba całkowita</param>
-        /// <param name="max">dowlona liczba całkowita</param>
-        /// <returns></returns>
+        /// <param name="max">dowolna liczba całkowita</param>
+        /// <returns>liczba całkowita z podanego zakresu</returns>
         static int Losuj(int min = 1, int max = 100)
         {
-            if( min > max )
-            {
-                int temp = max;
-                max = min;
-                min = temp;
-            }
             Random generator = new Random();
-            return generator.Next(min, max+1);
+            if (min > max)
+            { //swap
+                int temp = min;
+                min = max;
+                max = temp;
+            }
+            return generator.Next(min, max + 1);
         }
 
-        static int wylosowana;
-
-        static int WczytajDane( string prompt = "Podaj liczbę (X gdy koniec): ")
+        /// <summary>
+        /// Wczytuje z konsoli liczbę lub znak X
+        /// </summary>
+        /// <returns>Liczba całkowita odpowiadająca podanej wartości na konsoli</returns>
+        /// <exception cref="OperationCanceledException">gdy wprowadzono 'x' lub 'X'</exception>
+        static int WczytajLiczbe(string prompt = "Podaj liczbę (lub X aby zakończyć): ")
         {
-            int liczba = 0;
+            int propozycja = 0;
+
             while (true)
             {
-                Console.Write( prompt );
+                Console.Write(prompt);
                 string tekst = Console.ReadLine();
+
                 if (tekst.ToLower() == "x")
-                    throw new ExitAppException();
+                    throw new OperationCanceledException("Wprowadzono X");
 
                 try
                 {
-                    liczba = Convert.ToInt32(tekst);
+                    propozycja = Convert.ToInt32(tekst);
                     break;
                 }
                 catch (FormatException)
                 {
-                    Console.WriteLine("Nie podano liczby! Spróbuj ponownie");
+                    Console.WriteLine("Nie podano liczby! Spróbuj jeszcze raz.");
                     continue;
                 }
                 catch (OverflowException)
                 {
-                    Console.WriteLine("Liczba nie mieści się w rejestrze! Spróbuj ponownie");
+                    Console.WriteLine("Liczba nie mieści się w rejestrze! Spróbuj jeszcze raz.");
                     continue;
                 }
             }
 
-            return liczba;
+            return propozycja;
         }
 
         static string Ocena(int propozycja)
@@ -71,41 +73,42 @@ namespace GraMonolitycznie
                 return "trafiono";
         }
 
+        static int wylosowana = 0;
+
         static void Main(string[] args)
         {
             // 1. Komputer losuje liczbę
-            int min = WczytajDane("Podaj wartość minimalną do wylosowania: ");
-            int max = WczytajDane("Podaj wartość maksymalną do wylosowania: ");
+            int min = WczytajLiczbe("Podaj zakres - min: ");
+            int max = WczytajLiczbe("Podaj zakres - max: ");
+
             wylosowana = Losuj(min, max);
             Console.WriteLine($"Wylosowałem liczbę od {min} do {max}. \n Odgadnij ją");
 
-#if(DEBUG)
+#if (DEBUG)
             Console.WriteLine(wylosowana);
 #endif
 
             //wykonuj
+            bool trafiono = false; //wartownik (zwany czasami flagą)
             do
             {
-                #region Krok 2. Człowiek proponuje rozwiązanie
                 int propozycja = 0;
                 try
                 {
-                    propozycja = WczytajDane("Podaj swoją propozycję lub X jeśli się poddajesz: ");
+                    propozycja = WczytajLiczbe("Podaj swoją propozycję (lub X aby poddać się): ");
+                    Console.WriteLine($"Przyjąłem wartość {propozycja}");
                 }
-                catch (ExitAppException)
+                catch (OperationCanceledException)
                 {
-                    Console.WriteLine("Szkoda, że już koniec. Do widzenia.");
-                    break;
+                    Console.WriteLine("Koniec");
+                    return;
                 }
-                Console.WriteLine($"Przyjąłem wartość {propozycja}");
-                #endregion
 
-                #region Krok 3. Komputer ocenia propozycję
+                //Console.WriteLine(Ocena(propozycja));
                 string wynik = Ocena(propozycja);
                 Console.WriteLine(wynik);
                 if (wynik == "trafiono")
                     break;
-                #endregion
             }
             while (true);
             //do momentu trafienia

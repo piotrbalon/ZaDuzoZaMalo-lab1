@@ -10,6 +10,13 @@ namespace GraMonolitycznie
     {
         static void Main(string[] args)
         {
+            /*
+            Console.WriteLine("Witaj!");
+            Console.Write("Podaj swoje imię: ");
+            string x = Console.ReadLine();
+            Console.WriteLine($"Witaj, {x}");
+            */
+
             // 1. Komputer losuje liczbę
             Random generator = new Random();
             int wylosowana = generator.Next(1, 101);
